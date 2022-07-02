@@ -1,7 +1,13 @@
 // ----------Variables----------
 
 // DOM
-const container = document.querySelector(".container")
+const container = document.querySelector(".container");
+let btn;
+let backlogBtn;
+let inProgressBtn;
+let completeBtn;
+let onHoldBtn;
+
 
 // Columns' name
 const columns = ["backlog", "in-progress", "complete", "on-hold"];
@@ -11,6 +17,7 @@ let backlogList;
 let inProgressList;
 let completeList;
 let onHoldList;
+let itemsLists;
 
 // Load Columns
 function loadColumns() {
@@ -42,6 +49,7 @@ function loadColumns() {
         btnContainer.className = "add-btn";
         const addBtn = document.createElement("p");
         addBtn.innerText = "+ Add Item";
+        addBtn.id = `${columns[index]}-btn`;
         column.appendChild(buttons);
         buttons.appendChild(btnContainer);
         btnContainer.appendChild(addBtn);
@@ -50,9 +58,16 @@ function loadColumns() {
         inProgressList = document.querySelector("#in-progress-list");
         completeList = document.querySelector("#complete-list");
         onHoldList = document.querySelector("#on-hold-list");
-        console.log(inProgressList)
+
+        backlogBtn = document.getElementById("backlog-btn");
+        inProgressBtn = document.getElementById("in-progress-btn");
+        completeBtn = document.getElementById("complete-btn");
+        onHoldBtn = document.getElementById("on-hold-btn");
+
+        itemsLists = [backlogList, inProgressList, completeList, onHoldList];
     })
 }
+
 loadColumns();
 
 
@@ -74,7 +89,6 @@ let onHoldListDetail = {
     column: onHoldList,
     items: ["Being uncool"]
 }
-// saveToLocalStorage();
 
 // Lists' name
 const lists = [backlogListDetail, inProgressListDetail, completeListDetail, onHoldListDetail];
@@ -123,3 +137,75 @@ function loadItems() {
 }
 loadItems();
 
+// ------------------Add New Item------------------
+
+function showItemInput(parent) {
+    const itemInput = document.createElement("input");
+    itemInput.type = "text";
+    itemInput.className = "item-input";
+    itemInput.style.display = "block";
+    parent.appendChild(itemInput);
+    itemInput.focus();
+}
+
+function saveButton(parent, column, button, list, items) {
+    const btn = document.createElement("p");
+    btn.innerText = "+ Save Item";
+    parent.appendChild(btn);
+
+    btn.addEventListener("click", () => {
+        const itemInput = document.querySelector(".item-input");
+        if (itemInput.value) {
+            saveItem(itemInput, column, list, items);
+        } else {
+            // Hide Save Button
+            document.querySelector(".item-input").remove();
+        }
+        btn.remove();
+        button.style.display = "flex";
+    })
+}
+
+function saveItem(itemInput, column, list, items) {
+    newItem = itemInput.value;
+
+    const item = document.createElement("li");
+    item.innerText = newItem;
+    item.className = `${column}-item`;
+
+    
+
+
+    // Save to list
+    list.appendChild(item);
+    
+    // Save to LocalStorage
+    items.push(newItem);
+    saveToLocalStorage();
+
+    // Hide Save Button
+    document.querySelector(".item-input").remove();
+}
+
+
+
+
+
+const buttons = [backlogBtn, inProgressBtn, completeBtn, onHoldBtn];
+
+buttons.forEach((btn, index) => {
+    btnHandler(btn, index)
+})
+
+
+function btnHandler(btn, index) {
+    btn.addEventListener("click", () => {
+        // Show Input
+        const column = btn.parentElement.parentElement.parentElement;
+        showItemInput(column);
+
+        // Save Item
+        btn.style.display = "none";
+        saveButton(btn.parentElement, column, btn, itemsLists[index], lists[index].items)
+    })
+}
