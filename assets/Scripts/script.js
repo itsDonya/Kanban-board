@@ -25,8 +25,8 @@ function loadColumns() {
     columns.forEach((name, index) => {
         const column = document.createElement("div");
         column.className = `${name}-column`;
-        container.appendChild(column)
-
+        container.appendChild(column);
+        
         const header = document.createElement("div");
         header.className = `${name}-header`;
         const columnName = document.createElement("h3");
@@ -38,8 +38,11 @@ function loadColumns() {
         body.className = `${name}-body`;
         const list = document.createElement("ul");
         list.id = `${name}-list`;
-        list.classList.add("drag-column");
-        list.classList.add("over");
+        list.classList.add(`${index}`);
+        list.setAttribute("number", `${index}`);
+        list.setAttribute("ondrop", "drop(event)");
+        list.setAttribute("ondragover", "allowDrop(event)");
+        list.setAttribute("ondragenter", `dragEnter(${index})`);
         column.appendChild(body);
         body.appendChild(list);
         
@@ -131,6 +134,8 @@ function loadItems() {
             const item = document.createElement("li");
             item.innerText = listItem;
             item.className = `${columns[index]}-item`;
+            item.draggable = "true";
+            item.setAttribute("ondragstart", "drag(event)");
             column.appendChild(item);
         });
     })
@@ -172,10 +177,9 @@ function saveItem(itemInput, column, list, items) {
     const item = document.createElement("li");
     item.innerText = newItem;
     item.className = `${column}-item`;
-
-    
-
-
+    item.draggable = "true";
+    item.setAttribute("ondragstart", "drag(event)");
+   
     // Save to list
     list.appendChild(item);
     
@@ -208,4 +212,46 @@ function btnHandler(btn, index) {
         btn.style.display = "none";
         saveButton(btn.parentElement, column, btn, itemsLists[index], lists[index].items)
     })
+}
+
+// ------------------------Drag & Drop------------------------
+
+let draggedItem;
+let dragSource;
+let dragIndex;
+let formerIndex;
+let dragList;
+
+
+function allowDrop(ev) {
+    ev.preventDefault();
+}
+
+function drag(ev) {
+    draggedItem = ev.target;
+    dragSource = Number(ev.path[1].className);
+    dragList = lists[dragSource].items;
+    console.log(dragList);
+}
+
+function dragEnter(index) {
+    dragIndex = index;
+    itemsLists.map(list => list.classList.remove("over"));
+    itemsLists[dragIndex].classList.add("over")
+}
+
+function drop(ev) {
+    ev.preventDefault();
+    ev.target.appendChild(draggedItem);
+    // ev.target.classList.remove("over");
+    itemsLists.map(list => list.classList.remove("over"));
+
+    // Add to New List
+    lists[dragIndex].items.push(draggedItem.innerText);
+    
+    // Delete from Former List
+    dragList.splice(dragList.indexOf(draggedItem.innerText), 1)
+
+    // Save All
+    saveToLocalStorage();
 }

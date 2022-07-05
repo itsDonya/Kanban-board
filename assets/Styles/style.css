@@ -227,4 +227,9 @@ body {
   outline: none;
   border: none;
 }
+
+.over {
+  border-radius: 6px;
+  background-color: #d046748e;
+}
 /*# sourceMappingURL=style.css.map */
